@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bùi Hữu Đại Solar PRO 2026</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<style>
+body{font-family:Segoe UI;max-width:850px;margin:auto;padding:15px;background:#f4f7f9}
+.card{background:#fff;padding:20px;border-radius:15px;box-shadow:0 5px 20px rgba(0,0,0,.1)}
+h2{text-align:center;color:#0a67c1}
+.name{text-align:center;color:#18a957;font-weight:bold;margin-bottom:10px}
+img.main{width:100%;border-radius:12px;margin-bottom:10px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.grid img{width:100%;border-radius:10px}
+
+input,select{width:100%;padding:10px;margin-top:5px;border-radius:8px;border:1px solid #ccc}
+
+.res{margin-top:20px;border:2px solid #18a957;border-radius:10px}
+.row{display:flex;justify-content:space-between;padding:10px;border-bottom:1px solid #eee}
+.row b{color:#d32f2f}
+
+.btn{display:block;text-align:center;margin-top:10px;padding:12px;border-radius:8px;color:#fff;text-decoration:none}
+.call{background:#18a957}
+.zalo{background:#0068ff}
+.pdf{background:#ff9800}
+.hidden{display:none}
+</style>
+</head>
+
+<body>
+
+<div class="card" id="pdfArea">
+
+<h2>⚡ BÁO GIÁ ĐIỆN MẶT TRỜI 2026</h2>
+<div class="name">BÙI HỮU ĐẠI – Chuyên gia điện mặt trời</div>
+
+<!-- ẢNH -->
+<img class="main" src="anh1.jpg">
+<div class="grid">
+<img src="anh2.jpg">
+<img src="anh3.jpg">
+<img src="anh4.jpg">
+<img src="anh5.jpg">
+</div>
+
+<label>Loại khách hàng</label>
+<select id="type" onchange="toggleMode()">
+<option value="res">Hộ gia đình</option>
+<option value="biz">Kinh doanh</option>
+</select>
+
+<div id="resBlock">
+<label>kWh/tháng</label>
+<input id="kwh" value="1000" oninput="calc()">
+</div>
+
+<div id="bizBlock" class="hidden">
+<label>Cao điểm (kWh)</label>
+<input id="peak" value="300" oninput="calc()">
+<label>Bình thường (kWh)</label>
+<input id="normal" value="400" oninput="calc()">
+<label>Thấp điểm (kWh)</label>
+<input id="off" value="300" oninput="calc()">
+</div>
+
+<label>Tỷ lệ tự dùng (%)</label>
+<input id="self" value="85" oninput="calc()">
+
+<label>Pin lưu trữ</label>
+<select id="battery" onchange="calc()">
+<option value="0">Không dùng</option>
+<option value="5">5 kWh</option>
+<option value="10">10 kWh</option>
+<option value="15">15 kWh</option>
+<option value="20">20 kWh</option>
+</select>
+
+<div class="res">
+<div class="row"><span>Tiền điện:</span><b id="bill"></b></div>
+<div class="row"><span>Sau khi lắp:</span><b id="after"></b></div>
+<div class="row"><span>Tiết kiệm/tháng:</span><b id="save"></b></div>
+<div class="row"><span>Gói đề xuất:</span><b id="package"></b></div>
+<div class="row"><span>Công suất:</span><b id="kwp"></b></div>
+<div class="row"><span>Pin lưu trữ:</span><b id="bat"></b></div>
+<div class="row"><span>Đầu tư:</span><b id="cost"></b></div>
+<div class="row"><span>Hoàn vốn:</span><b id="pay"></b></div>
+<div class="row"><span>Lợi nhuận 25 năm:</span><b id="profit"></b></div>
+</div>
+
+<br>
+<div style="text-align:center">
+<img id="qr" width="140">
+</div>
+
+</div>
+
+<a href="tel:0838933638" class="btn call">📞 GỌI</a>
+<a id="zaloLink" target="_blank" class="btn zalo">💬 ZALO</a>
+<button onclick="savePDF()" class="btn pdf">📄 Xuất PDF</button>
+
+<script>
+
+function vnd(x){return Math.round(x).toLocaleString("vi-VN")+" đ";}
+
+function toggleMode(){
+let t=document.getElementById("type").value;
+document.getElementById("resBlock").classList.toggle("hidden",t!=="res");
+document.getElementById("bizBlock").classList.toggle("hidden",t!=="biz");
+calc();
+}
+
+function calc(){
+
+let type=document.getElementById("type").value;
+let bill=0,kwh=0;
+
+// tính điện
+if(type==="res"){
+kwh=parseFloat(document.getElementById("kwh").value)||0;
+bill=kwh*2700;
+}else{
+let p=parseFloat(document.getElementById("peak").value)||0;
+let n=parseFloat(document.getElementById("normal").value)||0;
+let o=parseFloat(document.getElementById("off").value)||0;
+kwh=p+n+o;
+bill=(p*3170+n*1860+o*1200)*1.08;
+}
+
+// công suất chuẩn
+let kwp=kwh/120;
+
+// AUTO CHỌN GÓI
+let pack="";
+if(kwp<=5) pack="Gói 5kWp";
+else if(kwp<=8) pack="Gói 8kWp";
+else if(kwp<=12) pack="Gói 10-12kWp";
+else pack="Gói >15kWp";
+
+// pin
+let battery=parseFloat(document.getElementById("battery").value);
+
+// GIÁ CHUẨN
+let cost=kwp*11000000 + battery*4500000;
+
+// tiết kiệm
+let self=parseFloat(document.getElementById("self").value)/100;
+let saveMonth=bill*self;
+let after=bill*(1-self);
+
+// hoàn vốn
+let pay=cost/(saveMonth*12);
+
+// lợi nhuận
+let profit=-cost;
+for(let y=1;y<=25;y++){
+let deg=Math.pow(1-0.0055,y);
+profit+=saveMonth*12*deg;
+}
+
+// hiển thị
+document.getElementById("bill").innerText=vnd(bill);
+document.getElementById("after").innerText=vnd(after);
+document.getElementById("save").innerText=vnd(saveMonth);
+document.getElementById("kwp").innerText=kwp.toFixed(2)+" kWp";
+document.getElementById("bat").innerText=battery+" kWh";
+document.getElementById("cost").innerText=vnd(cost);
+document.getElementById("pay").innerText=pay.toFixed(1)+" năm";
+document.getElementById("profit").innerText=vnd(profit);
+document.getElementById("package").innerText=pack;
+
+// QR chuẩn
+let text=`Toi muon tu van ${pack} - ${kwp.toFixed(1)}kWp - dau tu ${Math.round(cost/1e6)}tr`;
+let zaloLink="https://zalo.me/0838933638?text="+encodeURIComponent(text);
+
+document.getElementById("qr").src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data="+encodeURIComponent(zaloLink);
+document.getElementById("zaloLink").href=zaloLink;
+
+}
+
+function savePDF(){
+html2pdf().from(document.getElementById("pdfArea")).save("bao-gia-solar.pdf");
+}
+
+window.onload=calc;
+
+</script>
+
+</body>
+</html> 
